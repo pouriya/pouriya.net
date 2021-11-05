@@ -1,0 +1,7 @@
+http://public.{DOMAIN} {
+	root * {ROOT_DIRECTORY}public/
+	file_server {
+		browse
+		precompressed gzip
+	}
+}

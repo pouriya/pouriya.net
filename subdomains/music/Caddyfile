@@ -1,0 +1,7 @@
+http://music.{DOMAIN} {
+	root * {ROOT_DIRECTORY}music/
+	file_server {
+		browse
+		precompressed gzip
+	}
+}

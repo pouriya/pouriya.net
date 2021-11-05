@@ -1,0 +1,11 @@
+https://fs.{DOMAIN} {
+	reverse_proxy {
+		to {MINIO_BIND_CONSOLE_ADDRESS}
+	}
+}
+
+http://fs.{DOMAIN} {
+	reverse_proxy {
+		to {MINIO_BIND_CONSOLE_ADDRESS}
+	}
+}

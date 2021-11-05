@@ -1,0 +1,3 @@
+https://about.{DOMAIN} {
+	root {ABOUT_SUBDOMAIN_ROOT_DIRECTORY}
+}

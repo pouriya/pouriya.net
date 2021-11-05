@@ -1,0 +1,7 @@
+http://videos.{DOMAIN} {
+	root * {ROOT_DIRECTORY}videos/
+	file_server {
+		browse
+		precompressed gzip
+	}
+}

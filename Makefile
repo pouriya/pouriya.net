@@ -73,7 +73,7 @@ install:
 	mkdir -p $(FS_ROOT_DIRECTORY)/videos
 	mkdir -p $(DEST_DIR) && mkdir -p $(DEST_DIR)/etc && cp $(CADDY_CONFIG_FILE) $(DEST_DIR)/etc
 	$(ECHO_LINE_SEPERATOR)
-	@ echo "Run Caddy webserver: caddy run -config $(DEST_DIR)/etc/$(CADDY_CONFIG_FILENAME)"
+	@ echo "Run Caddy webserver: caddy run -adapter caddyfile -config $(DEST_DIR)/etc/$(CADDY_CONFIG_FILENAME)"
 	@ echo "Run Minio: MINIO_ROOT_USER=<YOUR_USER> MINIO_ROOT_PASSWORD=<YOUR_PASSWORD> minio server --address $(MINIO_BIND_ADDRESS) --console-address $(MINIO_BIND_CONSOLE_ADDRESS) $(ROOT_DIRECTORY)"
 
 

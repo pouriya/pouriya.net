@@ -1,0 +1,3 @@
+[submodule "subdomains/about/themes/researcher"]
+	path = subdomains/about/themes/researcher
+	url = https://github.com/pouriya/hugo-researcher.git

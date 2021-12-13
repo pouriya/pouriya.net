@@ -2,3 +2,5 @@ _build/
 dist/
 .idea/
 .idea
+subdomains/about/resources
+subdomains/about/public

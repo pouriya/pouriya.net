@@ -1,17 +1,19 @@
 DOMAIN=pouriya.net
-DEST_DIR=$(CURDIR)/dist
-ROOT_DIRECTORY=$(CURDIR)/dist
-FS_ROOT_DIRECTORY=$(ROOT_DIRECTORY)/fs
-ABOUT_SUBDOMAIN_ROOT_DIRECTORY=$(ROOT_DIRECTORY)/var/lib/about.$(DOMAIN)
+PREFIX=$(CURDIR)/dist
+INSTALL_ROOT_DIRECTORY=$(PREFIX)
+FS_ROOT_DIRECTORY=$(INSTALL_ROOT_DIRECTORY)/fs
+ABOUT_SUBDOMAIN_ROOT_DIRECTORY=$(INSTALL_ROOT_DIRECTORY)/var/lib/about.$(DOMAIN)
 
 CADDY_CONFIG_FILENAME=$(DOMAIN).Caddyfile
 CADDY_CONFIG_FILE=$(BUILD_DIR)/etc/$(CADDY_CONFIG_FILENAME)
+CADDY_LOG_LEVEL=info
+CADDY_LOG_DIRECTORY=$(INSTALL_ROOT_DIRECTORY)/var/log
 
 MINIO_BIND_ADDRESS=127.0.0.1:9000
 MINIO_BIND_CONSOLE_ADDRESS=127.0.0.1:9001
 
 BUILD_DIR=_build
-REPLACE_VALUES=$(DOMAIN) $(FS_ROOT_DIRECTORY)/ $(MINIO_BIND_ADDRESS) $(MINIO_BIND_CONSOLE_ADDRESS) $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)
+REPLACE_VALUES=$(DOMAIN) $(INSTALL_ROOT_DIRECTORY)/ $(MINIO_BIND_ADDRESS) $(MINIO_BIND_CONSOLE_ADDRESS) $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)/ $(CADDY_LOG_DIRECTORY)/ $(CADDY_LOG_LEVEL)
 ADD_NEWLINES_TO_CADDY_CONFIG_FILE=@ echo >> $(CADDY_CONFIG_FILE) && echo >> $(CADDY_CONFIG_FILE)
 ECHO_LINE_SEPERATOR=@ echo "--------------------------------------------------------------------------------"
 
@@ -29,7 +31,7 @@ ifeq (, $(shell which hugo))
 endif
 
 
-all: build-caddy-config
+all: build-caddy-config build-about-subdomain ensure-files-and-directories
 
 
 build-caddy-config: make-clean-build-directory
@@ -59,23 +61,32 @@ build-caddy-config: make-clean-build-directory
 	cat $(BUILD_DIR)/tmp/videos.Caddyfile >> $(CADDY_CONFIG_FILE)
 
 
+
+build-about-subdomain:
+	cd subdomains/about && hugo --destination $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY) --baseURL $(DOMAIN) --minify
+
+
 make-clean-build-directory:
 	mkdir -p $(BUILD_DIR) && rm -rf $(BUILD_DIR)/tmp && rm -rf $(BUILD_DIR)/etc
 
 
-install:
-	mkdir -p $(ROOT_DIRECTORY)
+ensure-files-and-directories:
+	mkdir -p $(INSTALL_ROOT_DIRECTORY)
 	mkdir -p $(FS_ROOT_DIRECTORY)
+	mkdir -p $(CADDY_LOG_DIRECTORY)
 	mkdir -p $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)
+	touch $(CADDY_LOG_DIRECTORY)/about.$(DOMAIN).log
 	mkdir -p $(FS_ROOT_DIRECTORY)/books
 	mkdir -p $(FS_ROOT_DIRECTORY)/music
 	mkdir -p $(FS_ROOT_DIRECTORY)/public
 	mkdir -p $(FS_ROOT_DIRECTORY)/videos
-	mkdir -p $(DEST_DIR) && mkdir -p $(DEST_DIR)/etc && cp $(CADDY_CONFIG_FILE) $(DEST_DIR)/etc
+	mkdir -p $(INSTALL_ROOT_DIRECTORY)/etc && cp $(CADDY_CONFIG_FILE) $(INSTALL_ROOT_DIRECTORY)/etc
 	$(ECHO_LINE_SEPERATOR)
-	@ echo "Run Caddy webserver: caddy run -adapter caddyfile -config $(DEST_DIR)/etc/$(CADDY_CONFIG_FILENAME)"
-	@ echo "Run Minio: MINIO_ROOT_USER=<YOUR_USER> MINIO_ROOT_PASSWORD=<YOUR_PASSWORD> minio server --address $(MINIO_BIND_ADDRESS) --console-address $(MINIO_BIND_CONSOLE_ADDRESS) $(ROOT_DIRECTORY)"
-
+	@ echo "Run Caddy webserver:"
+	@ echo "  caddy run -adapter caddyfile -config $(INSTALL_ROOT_DIRECTORY)/etc/$(CADDY_CONFIG_FILENAME)"
+	@ echo "Run Minio:"
+	@ echo "  MINIO_ROOT_USER=<YOUR_USER> MINIO_ROOT_PASSWORD=<YOUR_PASSWORD> minio server --address $(MINIO_BIND_ADDRESS) --console-address $(MINIO_BIND_CONSOLE_ADDRESS) $(FS_ROOT_DIRECTORY)"
+	$(ECHO_LINE_SEPERATOR)
 
 clean:
 	rm -rf _build

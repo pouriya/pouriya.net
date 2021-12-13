@@ -1,3 +1,12 @@
 https://about.{DOMAIN} {
-	root {ABOUT_SUBDOMAIN_ROOT_DIRECTORY}
+	root * {ABOUT_SUBDOMAIN_ROOT_DIRECTORY}
+	log {
+    	output file {LOG_DIRECTORY}about.{DOMAIN}.log {
+               	roll_size 10MiB
+               	roll_keep 5
+               	roll_keep_for 10d
+        }
+    	format json
+    	level  {LOG_LEVEL}
+    }
 }

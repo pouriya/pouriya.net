@@ -4,3 +4,4 @@ dist/
 .idea
 subdomains/about/resources
 subdomains/about/public
+subdomains/about/.hugo_build.lock

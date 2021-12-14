@@ -1,12 +1,17 @@
 https://about.{DOMAIN} {
 	root * {ABOUT_SUBDOMAIN_ROOT_DIRECTORY}
+	file_server {
+		index index.html
+		precompressed zstd br gzip
+		disable_canonical_uris
+	}
 	log {
-    	output file {LOG_DIRECTORY}about.{DOMAIN}.log {
-               	roll_size 10MiB
-               	roll_keep 5
-               	roll_keep_for 10d
-        }
-    	format json
-    	level  {LOG_LEVEL}
-    }
+		output file {LOG_DIRECTORY}about.{DOMAIN}.log {
+			roll_size 10MiB
+			roll_keep 5
+			roll_keep_for 10d
+		}
+		format json
+		level {LOG_LEVEL}
+	}
 }

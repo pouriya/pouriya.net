@@ -14,7 +14,7 @@ MINIO_BIND_CONSOLE_ADDRESS=127.0.0.1:9001
 
 BUILD_DIR=_build
 REPLACE_VALUES=$(DOMAIN) $(INSTALL_ROOT_DIRECTORY)/ $(MINIO_BIND_ADDRESS) $(MINIO_BIND_CONSOLE_ADDRESS) $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)/ $(CADDY_LOG_DIRECTORY)/ $(CADDY_LOG_LEVEL)
-ADD_NEWLINES_TO_CADDY_CONFIG_FILE=@ echo >> $(CADDY_CONFIG_FILE) && echo >> $(CADDY_CONFIG_FILE)
+ADD_NEWLINES_TO_CADDY_CONFIG_FILE=@ echo >> $(CADDY_CONFIG_FILE)
 ECHO_LINE_SEPERATOR=@ echo "--------------------------------------------------------------------------------"
 
 
@@ -34,6 +34,10 @@ endif
 all: build-caddy-config build-about-subdomain ensure-files-and-directories
 
 
+localhost:
+	$(MAKE) DOMAIN=localhost all
+
+
 build-caddy-config: make-clean-build-directory
 	mkdir -p $(BUILD_DIR)/etc/ && mkdir -p $(BUILD_DIR)/tmp/
 	
@@ -44,25 +48,25 @@ build-caddy-config: make-clean-build-directory
 	./tools/replace.sh subdomains/books/Caddyfile $(BUILD_DIR)/tmp/books.Caddyfile $(REPLACE_VALUES)
 	cat $(BUILD_DIR)/tmp/books.Caddyfile >> $(CADDY_CONFIG_FILE)
 	$(ADD_NEWLINES_TO_CADDY_CONFIG_FILE)
-	
+
 	./tools/replace.sh subdomains/fs/Caddyfile $(BUILD_DIR)/tmp/fs.Caddyfile $(REPLACE_VALUES)
 	cat $(BUILD_DIR)/tmp/fs.Caddyfile >> $(CADDY_CONFIG_FILE)
 	$(ADD_NEWLINES_TO_CADDY_CONFIG_FILE)
-	
+
 	./tools/replace.sh subdomains/music/Caddyfile $(BUILD_DIR)/tmp/music.Caddyfile $(REPLACE_VALUES)
 	cat $(BUILD_DIR)/tmp/music.Caddyfile >> $(CADDY_CONFIG_FILE)
 	$(ADD_NEWLINES_TO_CADDY_CONFIG_FILE)
-	
+
 	./tools/replace.sh subdomains/public/Caddyfile $(BUILD_DIR)/tmp/public.Caddyfile $(REPLACE_VALUES)
 	cat $(BUILD_DIR)/tmp/public.Caddyfile >> $(CADDY_CONFIG_FILE)
 	$(ADD_NEWLINES_TO_CADDY_CONFIG_FILE)
-	
+
 	./tools/replace.sh subdomains/videos/Caddyfile $(BUILD_DIR)/tmp/videos.Caddyfile $(REPLACE_VALUES)
 	cat $(BUILD_DIR)/tmp/videos.Caddyfile >> $(CADDY_CONFIG_FILE)
 
 
-
 build-about-subdomain:
+	git submodule update --init
 	cd subdomains/about && hugo --destination $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY) --baseURL $(DOMAIN) --minify
 
 
@@ -88,5 +92,15 @@ ensure-files-and-directories:
 	@ echo "  MINIO_ROOT_USER=<YOUR_USER> MINIO_ROOT_PASSWORD=<YOUR_PASSWORD> minio server --address $(MINIO_BIND_ADDRESS) --console-address $(MINIO_BIND_CONSOLE_ADDRESS) $(FS_ROOT_DIRECTORY)"
 	$(ECHO_LINE_SEPERATOR)
 
+
 clean:
 	rm -rf _build
+
+
+caddy-format:
+	caddy fmt -overwrite subdomains/about/Caddyfile
+	caddy fmt -overwrite subdomains/books/Caddyfile
+	caddy fmt -overwrite subdomains/fs/Caddyfile
+	caddy fmt -overwrite subdomains/music/Caddyfile
+	caddy fmt -overwrite subdomains/public/Caddyfile
+	caddy fmt -overwrite subdomains/videos/Caddyfile

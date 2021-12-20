@@ -9,6 +9,9 @@ CADDY_CONFIG_FILE=$(BUILD_DIR)/etc/$(CADDY_CONFIG_FILENAME)
 CADDY_LOG_LEVEL=info
 CADDY_LOG_DIRECTORY=$(INSTALL_ROOT_DIRECTORY)/var/log
 
+PFDNLD_LINK_FILENAME=pfdnld.links
+PFDNLD_RESULT_FILENAME=pfdnld-download-result.txt
+
 MINIO_BIND_ADDRESS=127.0.0.1:9000
 MINIO_BIND_CONSOLE_ADDRESS=127.0.0.1:9001
 
@@ -34,7 +37,7 @@ endif
 all: build install
 
 
-build: build-caddy-config build-about-subdomain
+build: reload-submodules build-caddy-config build-about-subdomain
 
 
 localhost-all:
@@ -43,6 +46,10 @@ localhost-all:
 
 localhost-build:
 	$(MAKE) DOMAIN=localhost build
+
+
+reload-submodules:
+	git submodule update --init
 
 
 build-caddy-config: ensure-build-directory
@@ -77,7 +84,6 @@ build-caddy-config: ensure-build-directory
 
 
 build-about-subdomain:
-	git submodule update --init
 	cd subdomains/about && hugo --destination $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY) --baseURL https://about.$(DOMAIN) --minify
 
 
@@ -88,8 +94,8 @@ ensure-build-directory: clean
 install:
 	mkdir -p $(INSTALL_ROOT_DIRECTORY)
 	mkdir -p $(INSTALL_ROOT_DIRECTORY)/bin
-	cp deps/pfdnld/pfdnld.py $(INSTALL_ROOT_DIRECTORY)/bin/pfdnld
-	chmod a+x $(INSTALL_ROOT_DIRECTORY)/bin/pfdnld
+	cp deps/pfdnld/pfdnld.py $(INSTALL_ROOT_DIRECTORY)/bin/pfdnld && chmod a+x $(INSTALL_ROOT_DIRECTORY)/bin/pfdnld
+	mkdir -p $(INSTALL_ROOT_DIRECTORY)/tmp && mkdir -p $(INSTALL_ROOT_DIRECTORY)/tmp/pfdnld
 	mkdir -p $(FS_ROOT_DIRECTORY)
 	mkdir -p $(CADDY_LOG_DIRECTORY)
 	mkdir -p $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)
@@ -100,7 +106,10 @@ install:
 	mkdir -p $(FS_ROOT_DIRECTORY)/videos
 	mkdir -p $(FS_ROOT_DIRECTORY)/videos/movies
 	mkdir -p $(FS_ROOT_DIRECTORY)/videos/series
-	mkdir -p $(INSTALL_ROOT_DIRECTORY)/etc && cp $(CADDY_CONFIG_FILE) $(INSTALL_ROOT_DIRECTORY)/etc
+	mkdir -p $(INSTALL_ROOT_DIRECTORY)/etc
+	cp $(CADDY_CONFIG_FILE) $(INSTALL_ROOT_DIRECTORY)/etc
+	touch $(INSTALL_ROOT_DIRECTORY)/etc/$(PFDNLD_LINK_FILENAME)
+	touch $(INSTALL_ROOT_DIRECTORY)/etc/$(PFDNLD_RESULT_FILENAME)
 	$(ECHO_LINE_SEPERATOR)
 	@ tree $(INSTALL_ROOT_DIRECTORY) 2>/dev/null || true
 	$(ECHO_LINE_SEPERATOR)
@@ -108,6 +117,8 @@ install:
 	@ echo "  caddy run -adapter caddyfile -config $(INSTALL_ROOT_DIRECTORY)/etc/$(CADDY_CONFIG_FILENAME)"
 	@ echo "Run Minio:"
 	@ echo "  MINIO_ROOT_USER=<YOUR_USER> MINIO_ROOT_PASSWORD=<YOUR_PASSWORD> minio server --address $(MINIO_BIND_ADDRESS) --console-address $(MINIO_BIND_CONSOLE_ADDRESS) $(FS_ROOT_DIRECTORY)"
+	@ echo "Run PFDNLD:"
+	@ echo "  $(INSTALL_ROOT_DIRECTORY)/bin/pfdnld -l $(INSTALL_ROOT_DIRECTORY)/etc/$(PFDNLD_LINK_FILENAME) -r $(INSTALL_ROOT_DIRECTORY)/etc/$(PFDNLD_RESULT_FILENAME) --tmp-dir $(INSTALL_ROOT_DIRECTORY)/tmp/pfdnld --out-dir $(FS_ROOT_DIRECTORY) -p 30"
 	$(ECHO_LINE_SEPERATOR)
 
 
@@ -123,6 +134,9 @@ dist-clean: clean
 	@ echo "rm -rf $(CADDY_LOG_DIRECTORY)/about.$(DOMAIN).log"
 	@ echo "rm -rf $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)"
 	@ echo "rm -rf $(INSTALL_ROOT_DIRECTORY)/etc/$(CADDY_CONFIG_FILENAME)"
+	@ echo "rm -rf $(INSTALL_ROOT_DIRECTORY)/tmp/pfdnld"
+	@ echo "rm -rf $(INSTALL_ROOT_DIRECTORY)/etc/$(PFDNLD_LINK_FILENAME)"
+	@ echo "rm -rf $(INSTALL_ROOT_DIRECTORY)/etc/$(PFDNLD_RESULT_FILENAME)"
 	$(ECHO_LINE_SEPERATOR)
 	@ echo "WARNING: Check directories before running above commands or you maye remove your data permanently!"
 

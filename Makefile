@@ -38,7 +38,7 @@ localhost:
 	$(MAKE) DOMAIN=localhost all
 
 
-build-caddy-config: make-clean-build-directory
+build-caddy-config: ensure-build-directory
 	mkdir -p $(BUILD_DIR)/etc/ && mkdir -p $(BUILD_DIR)/tmp/
 
 	./tools/replace.sh ./Caddyfile $(BUILD_DIR)/tmp/Caddyfile $(REPLACE_VALUES)
@@ -74,12 +74,15 @@ build-about-subdomain:
 	cd subdomains/about && hugo --destination $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY) --baseURL https://about.$(DOMAIN) # --minify
 
 
-make-clean-build-directory:
+ensure-build-directory: clean
 	mkdir -p $(BUILD_DIR) && rm -rf $(BUILD_DIR)/tmp && rm -rf $(BUILD_DIR)/etc
 
 
 ensure-files-and-directories:
 	mkdir -p $(INSTALL_ROOT_DIRECTORY)
+	mkdir -p $(INSTALL_ROOT_DIRECTORY)/bin
+	cp deps/pfdnld/pfdnld.py $(INSTALL_ROOT_DIRECTORY)/bin/pfdnld
+	chmod a+x $(INSTALL_ROOT_DIRECTORY)/bin/pfdnld
 	mkdir -p $(FS_ROOT_DIRECTORY)
 	mkdir -p $(CADDY_LOG_DIRECTORY)
 	mkdir -p $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)

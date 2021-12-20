@@ -13,7 +13,7 @@ MINIO_BIND_ADDRESS=127.0.0.1:9000
 MINIO_BIND_CONSOLE_ADDRESS=127.0.0.1:9001
 
 BUILD_DIR=_build
-REPLACE_VALUES=$(DOMAIN) $(INSTALL_ROOT_DIRECTORY)/ $(MINIO_BIND_ADDRESS) $(MINIO_BIND_CONSOLE_ADDRESS) $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)/ $(CADDY_LOG_DIRECTORY)/ $(CADDY_LOG_LEVEL)
+REPLACE_VALUES=$(DOMAIN) $(INSTALL_ROOT_DIRECTORY)/ $(FS_ROOT_DIRECTORY)/ $(MINIO_BIND_ADDRESS) $(MINIO_BIND_CONSOLE_ADDRESS) $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)/ $(CADDY_LOG_DIRECTORY)/ $(CADDY_LOG_LEVEL)
 ADD_NEWLINES_TO_CADDY_CONFIG_FILE=@ echo >> $(CADDY_CONFIG_FILE)
 ECHO_LINE_SEPERATOR=@ echo "--------------------------------------------------------------------------------"
 
@@ -67,7 +67,7 @@ build-caddy-config: make-clean-build-directory
 
 build-about-subdomain:
 	git submodule update --init
-	cd subdomains/about && hugo --destination $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY) --baseURL $(DOMAIN) --minify
+	cd subdomains/about && hugo --destination $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY) --baseURL https://about.$(DOMAIN) # --minify
 
 
 make-clean-build-directory:
@@ -84,6 +84,8 @@ ensure-files-and-directories:
 	mkdir -p $(FS_ROOT_DIRECTORY)/music
 	mkdir -p $(FS_ROOT_DIRECTORY)/public
 	mkdir -p $(FS_ROOT_DIRECTORY)/videos
+	mkdir -p $(FS_ROOT_DIRECTORY)/videos/movies
+	mkdir -p $(FS_ROOT_DIRECTORY)/videos/series
 	mkdir -p $(INSTALL_ROOT_DIRECTORY)/etc && cp $(CADDY_CONFIG_FILE) $(INSTALL_ROOT_DIRECTORY)/etc
 	$(ECHO_LINE_SEPERATOR)
 	@ echo "Run Caddy webserver:"

@@ -1,5 +1,5 @@
 http://books.{DOMAIN} {
-	root * {ROOT_DIRECTORY}books/
+	root * {FS_ROOT_DIRECTORY}books/
 	file_server {
 		browse
 		precompressed gzip

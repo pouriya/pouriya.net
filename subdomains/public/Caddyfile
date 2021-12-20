@@ -1,5 +1,5 @@
 http://public.{DOMAIN} {
-	root * {ROOT_DIRECTORY}public/
+	root * {FS_ROOT_DIRECTORY}public/
 	file_server {
 		browse
 		precompressed gzip

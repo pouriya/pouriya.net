@@ -5,6 +5,10 @@ https://about.{DOMAIN} {
 		precompressed zstd br gzip
 		disable_canonical_uris
 	}
+	handle_errors {
+		rewrite * /404.html
+		file_server
+	}
 	log {
 		output file {LOG_DIRECTORY}about.{DOMAIN}.log {
 			roll_size 10MiB

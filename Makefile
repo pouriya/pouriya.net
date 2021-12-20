@@ -40,11 +40,15 @@ localhost:
 
 build-caddy-config: make-clean-build-directory
 	mkdir -p $(BUILD_DIR)/etc/ && mkdir -p $(BUILD_DIR)/tmp/
-	
+
+	./tools/replace.sh ./Caddyfile $(BUILD_DIR)/tmp/Caddyfile $(REPLACE_VALUES)
+	cat $(BUILD_DIR)/tmp/Caddyfile >> $(CADDY_CONFIG_FILE)
+	$(ADD_NEWLINES_TO_CADDY_CONFIG_FILE)
+
 	./tools/replace.sh subdomains/about/Caddyfile $(BUILD_DIR)/tmp/about.Caddyfile $(REPLACE_VALUES)
 	cat $(BUILD_DIR)/tmp/about.Caddyfile >> $(CADDY_CONFIG_FILE)
 	$(ADD_NEWLINES_TO_CADDY_CONFIG_FILE)
-	
+
 	./tools/replace.sh subdomains/books/Caddyfile $(BUILD_DIR)/tmp/books.Caddyfile $(REPLACE_VALUES)
 	cat $(BUILD_DIR)/tmp/books.Caddyfile >> $(CADDY_CONFIG_FILE)
 	$(ADD_NEWLINES_TO_CADDY_CONFIG_FILE)
@@ -100,6 +104,7 @@ clean:
 
 
 caddy-format:
+	caddy fmt -overwrite Caddyfile
 	caddy fmt -overwrite subdomains/about/Caddyfile
 	caddy fmt -overwrite subdomains/books/Caddyfile
 	caddy fmt -overwrite subdomains/fs/Caddyfile

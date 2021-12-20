@@ -4,4 +4,9 @@ http://public.{DOMAIN} {
 		browse
 		precompressed gzip
 	}
+	log {
+		output stdout
+		format console
+		level {LOG_LEVEL}
+	}
 }

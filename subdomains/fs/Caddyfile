@@ -2,10 +2,20 @@ https://fs.{DOMAIN} {
 	reverse_proxy {
 		to {MINIO_BIND_CONSOLE_ADDRESS}
 	}
+	log {
+		output stdout
+		format console
+		level {LOG_LEVEL}
+	}
 }
 
 http://fs.{DOMAIN} {
 	reverse_proxy {
 		to {MINIO_BIND_CONSOLE_ADDRESS}
+	}
+	log {
+		output stdout
+		format console
+		level {LOG_LEVEL}
 	}
 }

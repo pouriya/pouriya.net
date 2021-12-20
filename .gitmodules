@@ -1,3 +1,6 @@
 [submodule "subdomains/about/themes/researcher"]
 	path = subdomains/about/themes/researcher
 	url = https://github.com/pouriya/hugo-researcher.git
+[submodule "deps/pfdnld"]
+	path = deps/pfdnld
+	url = https://github.com/pouriya/pfdnld.git

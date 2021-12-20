@@ -1,5 +1,5 @@
 _build/
-dist/
+_test/
 .idea/
 .idea
 subdomains/about/resources

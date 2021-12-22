@@ -34,28 +34,30 @@ REPLACE_VALUES=$(DOMAIN) $(INSTALL_ROOT_DIRECTORY)/ $(FS_ROOT_DIRECTORY)/ $(MINI
 ADD_NEWLINES_TO_CADDY_CONFIG_FILE=@ echo >> $(CADDY_BUILD_CONFIG_FILE)
 ECHO_LINE_SEPERATOR=@ echo "--------------------------------------------------------------------------------"
 
-
-ifeq (, $(shell which caddy))
- $(warning "Could not found caddy in PATH, consider installing Caddy Webserver from https://caddyserver.com")
+CADDY_CHECK:=$(shell command -v $(CADDY) 2> /dev/null)
+ifndef CADDY_CHECK
+ $(warning "Could not found caddy at '$(CADDY)', consider installing Caddy Webserver from https://caddyserver.com")
 endif
 
-ifeq (, $(shell which minio))
- $(warning "Could not found minio in PATH, consider installing Minio Server from https://min.io/")
+MINIO_CHECK:=$(shell command -v $(MINIO) 2> /dev/null)
+ifndef MINIO_CHECK
+ $(warning "Could not found minio at '$(MINIO)', consider installing Minio Server from https://min.io/")
 endif
 
-ifeq (, $(shell which hugo))
- $(error "Could not found hugo in PATH, consider installing Hugo from https://gohugo.io")
+HUGO_CHECK:=$(shell command -v $(HUGO) 2> /dev/null)
+ifndef HUGO_CHECK
+ $(error "Could not found hugo at '$(HUGO)', consider installing Hugo from https://gohugo.io")
 endif
 
 
 all: build install
 
 
-build: build-caddy-config build-about-subdomain
-
-
 localhost-all:
 	$(MAKE) DOMAIN=localhost all
+
+
+build: build-caddy-config build-about-subdomain
 
 
 localhost-build:

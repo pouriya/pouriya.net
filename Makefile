@@ -1,23 +1,37 @@
 DOMAIN=pouriya.net
 PREFIX=$(CURDIR)/_test
 INSTALL_ROOT_DIRECTORY=$(PREFIX)
+ETC_DIR=$(INSTALL_ROOT_DIRECTORY)/etc
+BIN_DIR=$(INSTALL_ROOT_DIRECTORY)/bin
+VAR_DIR=$(INSTALL_ROOT_DIRECTORY)/var
+TMP_DIR=$(INSTALL_ROOT_DIRECTORY)/tmp
 FS_ROOT_DIRECTORY=$(INSTALL_ROOT_DIRECTORY)/srv/minio
-ABOUT_SUBDOMAIN_ROOT_DIRECTORY=$(INSTALL_ROOT_DIRECTORY)/var/lib/about.$(DOMAIN)
+ABOUT_SUBDOMAIN_ROOT_DIRECTORY=$(VAR_DIR)/lib/about.$(DOMAIN)
+ABOUT_SUBDOMAIN_LOG_FILE=$(VAR_DIR)/log/about.$(DOMAIN).log
 
+HUGO=hugo
+
+CADDY=caddy
 CADDY_CONFIG_FILENAME=$(DOMAIN).Caddyfile
-CADDY_CONFIG_FILE=$(BUILD_DIR)/etc/$(CADDY_CONFIG_FILENAME)
+CADDY_BUILD_CONFIG_FILE=$(BUILD_DIR)/etc/$(CADDY_CONFIG_FILENAME)
+CADDY_CONFIG_FILE=$(ETC_DIR)/$(CADDY_CONFIG_FILENAME)
+CADDY_LOG_DIRECTORY=$(VAR_DIR)/log
 CADDY_LOG_LEVEL=info
-CADDY_LOG_DIRECTORY=$(INSTALL_ROOT_DIRECTORY)/var/log
 
-PFDNLD_LINK_FILENAME=pfdnld.links
-PFDNLD_RESULT_FILENAME=pfdnld-download-result.txt
+PFDNLD_DEPS=deps/pfdnld/pfdnld.py
+PFDNLD=$(BIN_DIR)/pfdnld
+PFDNLD_LINK_FILENAME=$(ETC_DIR)/pfdnld.links
+PFDNLD_ROOT_DIRECTORY=$(VAR_DIR)/lib/$(DOMAIN)-pfdnld
+PFDNLD_RESULT_FILENAME=$(PFDNLD_ROOT_DIRECTORY)/pfdnld.txt
+PFDNLD_TMP_DIR=$(TMP_DIR)/pfdnld
 
+MINIO=minio
 MINIO_BIND_ADDRESS=127.0.0.1:9000
 MINIO_BIND_CONSOLE_ADDRESS=127.0.0.1:9001
 
 BUILD_DIR=_build
-REPLACE_VALUES=$(DOMAIN) $(INSTALL_ROOT_DIRECTORY)/ $(FS_ROOT_DIRECTORY)/ $(MINIO_BIND_ADDRESS) $(MINIO_BIND_CONSOLE_ADDRESS) $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)/ $(CADDY_LOG_DIRECTORY)/ $(CADDY_LOG_LEVEL)
-ADD_NEWLINES_TO_CADDY_CONFIG_FILE=@ echo >> $(CADDY_CONFIG_FILE)
+REPLACE_VALUES=$(DOMAIN) $(INSTALL_ROOT_DIRECTORY)/ $(FS_ROOT_DIRECTORY)/ $(MINIO_BIND_ADDRESS) $(MINIO_BIND_CONSOLE_ADDRESS) $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)/ $(CADDY_LOG_DIRECTORY)/ $(CADDY_LOG_LEVEL) $(PFDNLD_ROOT_DIRECTORY)/
+ADD_NEWLINES_TO_CADDY_CONFIG_FILE=@ echo >> $(CADDY_BUILD_CONFIG_FILE)
 ECHO_LINE_SEPERATOR=@ echo "--------------------------------------------------------------------------------"
 
 
@@ -37,7 +51,7 @@ endif
 all: build install
 
 
-build: reload-submodules build-caddy-config build-about-subdomain
+build: build-caddy-config build-about-subdomain
 
 
 localhost-all:
@@ -48,77 +62,76 @@ localhost-build:
 	$(MAKE) DOMAIN=localhost build
 
 
-reload-submodules:
-	git submodule update --init
-
-
 build-caddy-config: ensure-build-directory
-	mkdir -p $(BUILD_DIR)/etc/ && mkdir -p $(BUILD_DIR)/tmp/
-
 	./tools/replace.sh ./Caddyfile $(BUILD_DIR)/tmp/Caddyfile $(REPLACE_VALUES)
-	cat $(BUILD_DIR)/tmp/Caddyfile >> $(CADDY_CONFIG_FILE)
+	cat $(BUILD_DIR)/tmp/Caddyfile >> $(CADDY_BUILD_CONFIG_FILE)
 	$(ADD_NEWLINES_TO_CADDY_CONFIG_FILE)
 
 	./tools/replace.sh subdomains/about/Caddyfile $(BUILD_DIR)/tmp/about.Caddyfile $(REPLACE_VALUES)
-	cat $(BUILD_DIR)/tmp/about.Caddyfile >> $(CADDY_CONFIG_FILE)
+	cat $(BUILD_DIR)/tmp/about.Caddyfile >> $(CADDY_BUILD_CONFIG_FILE)
 	$(ADD_NEWLINES_TO_CADDY_CONFIG_FILE)
 
 	./tools/replace.sh subdomains/books/Caddyfile $(BUILD_DIR)/tmp/books.Caddyfile $(REPLACE_VALUES)
-	cat $(BUILD_DIR)/tmp/books.Caddyfile >> $(CADDY_CONFIG_FILE)
+	cat $(BUILD_DIR)/tmp/books.Caddyfile >> $(CADDY_BUILD_CONFIG_FILE)
 	$(ADD_NEWLINES_TO_CADDY_CONFIG_FILE)
 
 	./tools/replace.sh subdomains/fs/Caddyfile $(BUILD_DIR)/tmp/fs.Caddyfile $(REPLACE_VALUES)
-	cat $(BUILD_DIR)/tmp/fs.Caddyfile >> $(CADDY_CONFIG_FILE)
+	cat $(BUILD_DIR)/tmp/fs.Caddyfile >> $(CADDY_BUILD_CONFIG_FILE)
 	$(ADD_NEWLINES_TO_CADDY_CONFIG_FILE)
 
 	./tools/replace.sh subdomains/music/Caddyfile $(BUILD_DIR)/tmp/music.Caddyfile $(REPLACE_VALUES)
-	cat $(BUILD_DIR)/tmp/music.Caddyfile >> $(CADDY_CONFIG_FILE)
+	cat $(BUILD_DIR)/tmp/music.Caddyfile >> $(CADDY_BUILD_CONFIG_FILE)
 	$(ADD_NEWLINES_TO_CADDY_CONFIG_FILE)
 
 	./tools/replace.sh subdomains/public/Caddyfile $(BUILD_DIR)/tmp/public.Caddyfile $(REPLACE_VALUES)
-	cat $(BUILD_DIR)/tmp/public.Caddyfile >> $(CADDY_CONFIG_FILE)
+	cat $(BUILD_DIR)/tmp/public.Caddyfile >> $(CADDY_BUILD_CONFIG_FILE)
 	$(ADD_NEWLINES_TO_CADDY_CONFIG_FILE)
 
 	./tools/replace.sh subdomains/videos/Caddyfile $(BUILD_DIR)/tmp/videos.Caddyfile $(REPLACE_VALUES)
-	cat $(BUILD_DIR)/tmp/videos.Caddyfile >> $(CADDY_CONFIG_FILE)
+	cat $(BUILD_DIR)/tmp/videos.Caddyfile >> $(CADDY_BUILD_CONFIG_FILE)
 
 
 build-about-subdomain:
-	cd subdomains/about && hugo --destination $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY) --baseURL https://about.$(DOMAIN) --minify
+	cd subdomains/about && $(HUGO) --destination $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY) --baseURL https://about.$(DOMAIN) --minify
 
 
 ensure-build-directory: clean
-	mkdir -p $(BUILD_DIR) && rm -rf $(BUILD_DIR)/tmp && rm -rf $(BUILD_DIR)/etc
+	mkdir -p $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)/tmp && mkdir -p $(BUILD_DIR)/tmp
+	rm -rf $(BUILD_DIR)/etc && mkdir -p $(BUILD_DIR)/etc
 
 
 install:
 	mkdir -p $(INSTALL_ROOT_DIRECTORY)
-	mkdir -p $(INSTALL_ROOT_DIRECTORY)/bin
-	cp deps/pfdnld/pfdnld.py $(INSTALL_ROOT_DIRECTORY)/bin/pfdnld && chmod a+x $(INSTALL_ROOT_DIRECTORY)/bin/pfdnld
-	mkdir -p $(INSTALL_ROOT_DIRECTORY)/tmp && mkdir -p $(INSTALL_ROOT_DIRECTORY)/tmp/pfdnld
+	mkdir -p $(BIN_DIR)
+	mkdir -p $(ETC_DIR)
+	mkdir -p $(VAR_DIR)
+	mkdir -p $(TMP_DIR)
+	cp $(PFDNLD_DEPS) $(PFDNLD) && chmod a+x $(PFDNLD)
+	mkdir -p $(PFDNLD_TMP_DIR)
 	mkdir -p $(FS_ROOT_DIRECTORY)
 	mkdir -p $(CADDY_LOG_DIRECTORY)
 	mkdir -p $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)
-	touch $(CADDY_LOG_DIRECTORY)/about.$(DOMAIN).log
+	touch $(ABOUT_SUBDOMAIN_LOG_FILE)
 	mkdir -p $(FS_ROOT_DIRECTORY)/books
 	mkdir -p $(FS_ROOT_DIRECTORY)/music
 	mkdir -p $(FS_ROOT_DIRECTORY)/public
 	mkdir -p $(FS_ROOT_DIRECTORY)/videos
 	mkdir -p $(FS_ROOT_DIRECTORY)/videos/movies
 	mkdir -p $(FS_ROOT_DIRECTORY)/videos/series
-	mkdir -p $(INSTALL_ROOT_DIRECTORY)/etc
-	cp $(CADDY_CONFIG_FILE) $(INSTALL_ROOT_DIRECTORY)/etc
-	touch $(INSTALL_ROOT_DIRECTORY)/etc/$(PFDNLD_LINK_FILENAME)
-	touch $(INSTALL_ROOT_DIRECTORY)/etc/$(PFDNLD_RESULT_FILENAME)
+	cp $(CADDY_BUILD_CONFIG_FILE) $(CADDY_CONFIG_FILE)
+	touch $(PFDNLD_LINK_FILENAME)
+	mkdir -p $(PFDNLD_ROOT_DIRECTORY)
+	touch $(PFDNLD_RESULT_FILENAME)
 	$(ECHO_LINE_SEPERATOR)
 	@ tree $(INSTALL_ROOT_DIRECTORY) 2>/dev/null || true
 	$(ECHO_LINE_SEPERATOR)
 	@ echo "Run Caddy webserver:"
-	@ echo "  caddy run -adapter caddyfile -config $(INSTALL_ROOT_DIRECTORY)/etc/$(CADDY_CONFIG_FILENAME)"
+	@ echo "  $(CADDY) run -adapter caddyfile -config $(CADDY_CONFIG_FILE)"
 	@ echo "Run Minio:"
-	@ echo "  MINIO_ROOT_USER=<YOUR_USER> MINIO_ROOT_PASSWORD=<YOUR_PASSWORD> minio server --address $(MINIO_BIND_ADDRESS) --console-address $(MINIO_BIND_CONSOLE_ADDRESS) $(FS_ROOT_DIRECTORY)"
+	@ echo "  MINIO_ROOT_USER=<YOUR_USER> MINIO_ROOT_PASSWORD=<YOUR_PASSWORD> $(MINIO) server --address $(MINIO_BIND_ADDRESS) --console-address $(MINIO_BIND_CONSOLE_ADDRESS) $(FS_ROOT_DIRECTORY)"
 	@ echo "Run PFDNLD:"
-	@ echo "  $(INSTALL_ROOT_DIRECTORY)/bin/pfdnld -l $(INSTALL_ROOT_DIRECTORY)/etc/$(PFDNLD_LINK_FILENAME) -r $(INSTALL_ROOT_DIRECTORY)/etc/$(PFDNLD_RESULT_FILENAME) --tmp-dir $(INSTALL_ROOT_DIRECTORY)/tmp/pfdnld --out-dir $(FS_ROOT_DIRECTORY) -p 30"
+	@ echo "  $(PFDNLD) -l $(PFDNLD_LINK_FILENAME) -r $(PFDNLD_RESULT_FILENAME) --tmp-dir $(PFDNLD_TMP_DIR) --out-dir $(FS_ROOT_DIRECTORY) -p 30"
 	$(ECHO_LINE_SEPERATOR)
 
 
@@ -129,14 +142,14 @@ clean:
 dist-clean: clean
 	$(ECHO_LINE_SEPERATOR)
 	@ echo "Run below commands:"
-	@ echo "rm -rf $(INSTALL_ROOT_DIRECTORY)/bin/pfdnld"
+	@ echo "rm -rf $(PFDNLD)"
 	@ echo "rm -rf $(FS_ROOT_DIRECTORY)"
-	@ echo "rm -rf $(CADDY_LOG_DIRECTORY)/about.$(DOMAIN).log"
+	@ echo "rm -rf $(PFDNLD_ROOT_DIRECTORY)"
 	@ echo "rm -rf $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)"
-	@ echo "rm -rf $(INSTALL_ROOT_DIRECTORY)/etc/$(CADDY_CONFIG_FILENAME)"
-	@ echo "rm -rf $(INSTALL_ROOT_DIRECTORY)/tmp/pfdnld"
-	@ echo "rm -rf $(INSTALL_ROOT_DIRECTORY)/etc/$(PFDNLD_LINK_FILENAME)"
-	@ echo "rm -rf $(INSTALL_ROOT_DIRECTORY)/etc/$(PFDNLD_RESULT_FILENAME)"
+	@ echo "rm -rf $(ABOUT_SUBDOMAIN_LOG_FILE)"
+	@ echo "rm -rf $(CADDY_CONFIG_FILE)"
+	@ echo "rm -rf $(PFDNLD_TMP_DIR)"
+	@ echo "rm -rf $(PFDNLD_LINK_FILENAME)"
 	$(ECHO_LINE_SEPERATOR)
 	@ echo "WARNING: Check directories before running above commands or you maye remove your data permanently!"
 

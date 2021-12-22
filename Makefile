@@ -20,7 +20,8 @@ CADDY_LOG_LEVEL=info
 
 PFDNLD_DEPS=deps/pfdnld/pfdnld.py
 PFDNLD=$(BIN_DIR)/pfdnld
-PFDNLD_LINK_FILENAME=$(ETC_DIR)/pfdnld.links
+PFDNLD_LINK_DIRECTORY=$(FS_ROOT_DIRECTORY)/pfdnld
+PFDNLD_LINK_FILENAME=$(PFDNLD_LINK_DIRECTORY)/pfdnld-links.txt
 PFDNLD_ROOT_DIRECTORY=$(VAR_DIR)/lib/$(DOMAIN)-pfdnld
 PFDNLD_RESULT_FILENAME=$(PFDNLD_ROOT_DIRECTORY)/pfdnld.txt
 PFDNLD_TMP_DIR=$(TMP_DIR)/pfdnld
@@ -129,6 +130,7 @@ install:
 	mkdir -p $(FS_ROOT_DIRECTORY)/videos
 	mkdir -p $(FS_ROOT_DIRECTORY)/videos/movies
 	mkdir -p $(FS_ROOT_DIRECTORY)/videos/series
+	mkdir -p $(PFDNLD_LINK_DIRECTORY)
 	cp $(CADDY_BUILD_CONFIG_FILE) $(CADDY_CONFIG_FILE)
 	touch $(PFDNLD_LINK_FILENAME)
 	mkdir -p $(PFDNLD_ROOT_DIRECTORY)
@@ -159,7 +161,6 @@ dist-clean: clean
 	@ echo "rm -rf $(ABOUT_SUBDOMAIN_LOG_FILE)"
 	@ echo "rm -rf $(CADDY_CONFIG_FILE)"
 	@ echo "rm -rf $(PFDNLD_TMP_DIR)"
-	@ echo "rm -rf $(PFDNLD_LINK_FILENAME)"
 	$(ECHO_LINE_SEPERATOR)
 	@ echo "WARNING: Check directories before running above commands or you maye remove your data permanently!"
 

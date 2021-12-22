@@ -34,19 +34,27 @@ REPLACE_VALUES=$(DOMAIN) $(INSTALL_ROOT_DIRECTORY)/ $(FS_ROOT_DIRECTORY)/ $(MINI
 ADD_NEWLINES_TO_CADDY_CONFIG_FILE=@ echo >> $(CADDY_BUILD_CONFIG_FILE)
 ECHO_LINE_SEPERATOR=@ echo "--------------------------------------------------------------------------------"
 
+ARIA2=aria2c
+
 CADDY_CHECK:=$(shell command -v $(CADDY) 2> /dev/null)
 ifndef CADDY_CHECK
- $(warning "Could not found caddy at '$(CADDY)', consider installing Caddy Webserver from https://caddyserver.com")
+ $(warning "Could not found caddy at '$(CADDY)'. For more info about installation see https://caddyserver.com")
 endif
 
 MINIO_CHECK:=$(shell command -v $(MINIO) 2> /dev/null)
 ifndef MINIO_CHECK
- $(warning "Could not found minio at '$(MINIO)', consider installing Minio Server from https://min.io/")
+ $(warning "Could not found minio at '$(MINIO)'. For more info about installation see https://min.io/")
 endif
 
 HUGO_CHECK:=$(shell command -v $(HUGO) 2> /dev/null)
 ifndef HUGO_CHECK
- $(error "Could not found hugo at '$(HUGO)', consider installing Hugo from https://gohugo.io")
+ $(error "Could not found hugo at '$(HUGO)'. For more info about installation see https://gohugo.io")
+endif
+
+
+ARIA2_CHECK:=$(shell command -v $(ARIA2) 2> /dev/null)
+ifndef ARIA2_CHECK
+ $(error "Could not found aria2 at '$(ARIA2)'. For more info about installation see https://aria2.github.io/")
 endif
 
 

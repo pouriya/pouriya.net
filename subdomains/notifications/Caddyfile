@@ -1,0 +1,10 @@
+https://notifications.{DOMAIN} {
+	reverse_proxy {
+		to {GOTIFY_BIND_ADDRESS}
+	}
+	log {
+		output stdout
+		format console
+		level {LOG_LEVEL}
+	}
+}

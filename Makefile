@@ -30,8 +30,16 @@ MINIO=minio
 MINIO_BIND_ADDRESS=127.0.0.1:9000
 MINIO_BIND_CONSOLE_ADDRESS=127.0.0.1:9001
 
+GOTIFY=gotify
+GOTIFY_BIND_PORT=8080
+GOTIFY_BIND_IP=127.0.0.1
+GOTIFY_BIND_ADDRESS=$(GOTIFY_BIND_IP):$(GOTIFY_BIND_PORT)
+GOTIFY_DIRECTORY=$(VAR_DIR)/lib/notifcations.$(DOMAIN)
+GOTIFY_IMAGE_DIRECTORY=$(GOTIFY_DIRECTORY)/images
+GOTIFY_DB_FILE=$(GOTIFY_DIRECTORY)/notifcations.db
+
 BUILD_DIR=_build
-REPLACE_VALUES=$(DOMAIN) $(INSTALL_ROOT_DIRECTORY)/ $(FS_ROOT_DIRECTORY)/ $(MINIO_BIND_ADDRESS) $(MINIO_BIND_CONSOLE_ADDRESS) $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)/ $(CADDY_LOG_DIRECTORY)/ $(CADDY_LOG_LEVEL) $(PFDNLD_ROOT_DIRECTORY)/
+REPLACE_VALUES=$(DOMAIN) $(INSTALL_ROOT_DIRECTORY)/ $(FS_ROOT_DIRECTORY)/ $(MINIO_BIND_ADDRESS) $(MINIO_BIND_CONSOLE_ADDRESS) $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)/ $(CADDY_LOG_DIRECTORY)/ $(CADDY_LOG_LEVEL) $(PFDNLD_ROOT_DIRECTORY)/ $(GOTIFY_BIND_ADDRESS)
 ADD_NEWLINES_TO_CADDY_CONFIG_FILE=@ echo >> $(CADDY_BUILD_CONFIG_FILE)
 ECHO_LINE_SEPERATOR=@ echo "--------------------------------------------------------------------------------"
 
@@ -47,11 +55,15 @@ ifndef MINIO_CHECK
  $(warning "Could not found minio at '$(MINIO)'. For more info about installation see https://min.io/")
 endif
 
+GOTIFY_CHECK:=$(shell command -v $(GOTIFY) 2> /dev/null)
+ifndef GOTIFY_CHECK
+ $(warning "Could not found gotify at '$(GOTIFY)'. For more info about installation see https://gotify.net/")
+endif
+
 HUGO_CHECK:=$(shell command -v $(HUGO) 2> /dev/null)
 ifndef HUGO_CHECK
  $(error "Could not found hugo at '$(HUGO)'. For more info about installation see https://gohugo.io")
 endif
-
 
 ARIA2_CHECK:=$(shell command -v $(ARIA2) 2> /dev/null)
 ifndef ARIA2_CHECK
@@ -92,6 +104,10 @@ build-caddy-config: ensure-build-directory
 
 	./tools/replace.sh subdomains/music/Caddyfile $(BUILD_DIR)/tmp/music.Caddyfile $(REPLACE_VALUES)
 	cat $(BUILD_DIR)/tmp/music.Caddyfile >> $(CADDY_BUILD_CONFIG_FILE)
+	$(ADD_NEWLINES_TO_CADDY_CONFIG_FILE)
+
+	./tools/replace.sh subdomains/notifications/Caddyfile $(BUILD_DIR)/tmp/notifications.Caddyfile $(REPLACE_VALUES)
+	cat $(BUILD_DIR)/tmp/notifications.Caddyfile >> $(CADDY_BUILD_CONFIG_FILE)
 	$(ADD_NEWLINES_TO_CADDY_CONFIG_FILE)
 
 	./tools/replace.sh subdomains/public/Caddyfile $(BUILD_DIR)/tmp/public.Caddyfile $(REPLACE_VALUES)
@@ -136,6 +152,8 @@ install:
 	mkdir -p $(PFDNLD_ROOT_DIRECTORY)
 	touch $(PFDNLD_RESULT_FILENAME)
 	$(ECHO_LINE_SEPERATOR)
+	mkdir -p $(GOTIFY_DIRECTORY)
+	mkdir -p $(GOTIFY_IMAGE_DIRECTORY)
 	@ tree $(INSTALL_ROOT_DIRECTORY) 2>/dev/null || true
 	$(ECHO_LINE_SEPERATOR)
 	@ echo "Run Caddy webserver:"
@@ -144,6 +162,8 @@ install:
 	@ echo "  MINIO_ROOT_USER=<YOUR_USER> MINIO_ROOT_PASSWORD=<YOUR_PASSWORD> $(MINIO) server --address $(MINIO_BIND_ADDRESS) --console-address $(MINIO_BIND_CONSOLE_ADDRESS) $(FS_ROOT_DIRECTORY)"
 	@ echo "Run PFDNLD:"
 	@ echo "  $(PFDNLD) -l $(PFDNLD_LINK_FILENAME) -r $(PFDNLD_RESULT_FILENAME) --tmp-dir $(PFDNLD_TMP_DIR) --out-dir $(FS_ROOT_DIRECTORY) -p 30"
+	@ echo "Run Gotify:"
+	@ echo "  GOTIFY_DEFAULTUSER_NAME=<YOUR_USER> GOTIFY_DEFAULTUSER_PASS=<YOUR_PASSWORD> GOTIFY_UPLOADEDIMAGESDIR=$(GOTIFY_IMAGE_DIRECTORY) GOTIFY_DATABASE_CONNECTION=$(GOTIFY_DB_FILE) GOTIFY_SERVER_PORT=$(GOTIFY_BIND_PORT) GOTIFY_SERVER_LISTENADDR=$(GOTIFY_BIND_IP) $(GOTIFY)"
 	$(ECHO_LINE_SEPERATOR)
 
 
@@ -161,6 +181,7 @@ dist-clean: clean
 	@ echo "rm -rf $(ABOUT_SUBDOMAIN_LOG_FILE)"
 	@ echo "rm -rf $(CADDY_CONFIG_FILE)"
 	@ echo "rm -rf $(PFDNLD_TMP_DIR)"
+	@ echo "rm -rf $(GOTIFY_DIRECTORY)"
 	$(ECHO_LINE_SEPERATOR)
 	@ echo "WARNING: Check directories before running above commands or you maye remove your data permanently!"
 

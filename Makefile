@@ -1,4 +1,4 @@
-DOMAIN=pouriya.net
+DOMAIN=localhost
 PREFIX=$(CURDIR)/_test
 INSTALL_ROOT_DIRECTORY=$(PREFIX)
 ETC_DIR=$(INSTALL_ROOT_DIRECTORY)/etc
@@ -74,15 +74,7 @@ endif
 all: build install
 
 
-localhost-all:
-	$(MAKE) DOMAIN=localhost all
-
-
 build: build-caddy-config build-about-subdomain
-
-
-localhost-build:
-	$(MAKE) DOMAIN=localhost build
 
 
 build-caddy-config: ensure-build-directory
@@ -175,19 +167,13 @@ dist-clean: clean
 	$(ECHO_LINE_SEPERATOR)
 	@ echo "Run below commands:"
 	@ echo "rm -rf $(PFDNLD)"
-	@ echo "rm -rf $(FS_ROOT_DIRECTORY)"
 	@ echo "rm -rf $(PFDNLD_ROOT_DIRECTORY)"
 	@ echo "rm -rf $(ABOUT_SUBDOMAIN_ROOT_DIRECTORY)"
 	@ echo "rm -rf $(ABOUT_SUBDOMAIN_LOG_FILE)"
-	@ echo "rm -rf $(CADDY_CONFIG_FILE)"
 	@ echo "rm -rf $(PFDNLD_TMP_DIR)"
 	@ echo "rm -rf $(GOTIFY_DIRECTORY)"
 	$(ECHO_LINE_SEPERATOR)
 	@ echo "WARNING: Check directories before running above commands or you maye remove your data permanently!"
-
-
-localhost-dist-clean:
-	$(MAKE) DOMAIN=localhost dist-clean
 
 
 caddy-format:

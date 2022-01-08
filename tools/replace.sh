@@ -10,8 +10,7 @@ minio_bind_console_address="s&{MINIO_BIND_CONSOLE_ADDRESS}&$7&g"
 about_subdomain_root_directory="s&{ABOUT_SUBDOMAIN_ROOT_DIRECTORY}&$8&g"
 log_directory="s&{LOG_DIRECTORY}&$9&g"
 log_level="s&{LOG_LEVEL}&$10&g"
-pfdnld_root_directory="s&{PFDNLD_ROOT_DIRECTORY}&$11&g"
-gotify_bind_address="s&{GOTIFY_BIND_ADDRESS}&$12&g"
+gotify_bind_address="s&{GOTIFY_BIND_ADDRESS}&$11&g"
 
 cp $1 $2
 sed -i ${domain} $2
@@ -22,5 +21,4 @@ sed -i ${minio_bind_console_address} $2
 sed -i ${about_subdomain_root_directory} $2
 sed -i ${log_directory} $2
 sed -i ${log_level} $2
-sed -i ${pfdnld_root_directory} $2
 sed -i ${gotify_bind_address} $2

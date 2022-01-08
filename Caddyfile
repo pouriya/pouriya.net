@@ -1,12 +1,3 @@
 https://{DOMAIN} {
 	redir https://about.{DOMAIN}{uri}
 }
-
-https://{DOMAIN}/pfdnld.txt {
-	root * {PFDNLD_ROOT_DIRECTORY}
-	file_server {
-		index pfdnld.txt
-		precompressed zstd br gzip
-		disable_canonical_uris
-	}
-}

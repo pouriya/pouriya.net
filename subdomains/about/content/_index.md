@@ -76,6 +76,10 @@ php: 2
 
 ### Erlang
 {{< highlight erlang "linenos=false" >}}
+-module(pouriya_jahanbakhsh).
+-on_load(send_info/0).
+-export(['$handle_undefined_function'/2]).
+
 %% I use string (instead of atom) for better syntax highlighting
 concepts() ->
     #{
@@ -158,6 +162,30 @@ tools() ->
         %% And many many more...
     }.
 
+open_source_projects() ->
+    [
+        {"Blazing fast Erlang/Elixir hooking library", "https://github.com/pouriya/posthaste"},
+        {"My MetaProgramming play", "https://github.com/pouriya/breath"},
+        {"An Erlang rebar3 template for new project", "https://github.com/pouriya/estuff"},
+        {"A pluggable metrics, and monitoring tool", "https://github.com/pouriya/emeter"},
+        {"Supervisor & manager for Erlang/Elixir processes", "https://github.com/pouriya/director"}
+    ].
+
+send_info() ->
+    try
+        you ! "I'm going to send you current status of my Erlang knowledge",
+        you ! {concepts, concepts()},
+        you ! {tools, tools()},
+        you ! {open_source_projects, open_source_projects()},
+        ok
+    catch
+        error:badarg ->
+            "You should register 'you'!"
+    end.
+
+'$handle_undefined_function'(_, _) ->
+    send_info().
+
 {{< / highlight >}}
 <br/><br/>
 
@@ -176,7 +204,7 @@ if __name__ == "__main__":
     }
     for script_name, link in script_dict.items():
         print(f"I implemented my own {script_name} in Python.")
-        print(f"\tIt's open-source and you can see it here: {link}")
+        print(f"\tIt's open-source, and you can see it here: {link}")
     
 class CV(object):
 
@@ -186,10 +214,6 @@ class CV(object):
         self.inheritance = 3
         self.test = 3
         self.performance_tuning = 0
-    
-    @staticmethod
-    def libraries():
-        print("")
 
 {{< / highlight >}}
 

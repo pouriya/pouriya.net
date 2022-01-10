@@ -6,6 +6,10 @@ title = "About Me"
 
 {{< figure class="avatar" src="/pouriya-jim-jahanbakhsh.png" alt="avatar">}}
 
+Hi. This page contains my career info.  
+If you don’t know anything about software development, This page isn’t for you.
+<br/><br/><br/><br/>
+
 {{< highlight xml "linenos=false" >}}
 <note to="reader">
   <!-- Please keep in mind -->
@@ -107,8 +111,8 @@ concepts() ->
 
 tools() ->
     #{
-        "rebar3" => 7,
-        "mnesia" => 6,
+        "rebar3" => 7, % Erlang build tool
+        "mnesia" => 6, % A distributed telecommunications DBMS
 
         "ejabberd" => #{ % A powerful XMPP & SIP & MQTT server
             "internals" => #{
@@ -171,12 +175,42 @@ open_source_projects() ->
         {"Supervisor & manager for Erlang/Elixir processes", "https://github.com/pouriya/director"}
     ].
 
+contributions() ->
+    [
+        {
+            "Erlang/OTP",
+            "Fixed a bug in stdlib's 'sys' module",
+            "https://github.com/erlang/otp/commit/eefcc985530acbd5cc4c97b6e4f537492fd61622"
+        },
+        {
+            "Ejabberd",
+            "Added a new hook to detect Component packets",
+            "https://github.com/processone/ejabberd/commit/7b3d26992b492063d6a6c2af3c595934d681accc"
+        },
+        {
+            "Warp (self-contained single binary maker)",
+            "Added a complete example for Erlang",
+            "https://github.com/dgiagio/warp/commit/bb2364dc9de3739fe96d1e1aa8bb941060ed4aba"
+        },
+        {
+            "Ejabberd",
+            "Check decoded JWT after successful authentication",
+            "https://github.com/processone/ejabberd/commit/a76531b90b552824a7832f65708eea7f4ba5ef67"
+        },
+        {
+            "Ejabberd",
+            "JWT enhancement",
+            "https://github.com/processone/ejabberd/commit/c056002f7c9056771f0823ece945e8e554f327fe"
+        }
+    ].
+
 send_info() ->
     try
         you ! "I'm going to send you current status of my Erlang knowledge",
         you ! {concepts, concepts()},
         you ! {tools, tools()},
         you ! {open_source_projects, open_source_projects()},
+        you ! {contributions, contributions()},
         ok
     catch
         error:badarg ->

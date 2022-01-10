@@ -8,7 +8,7 @@ title = "About Me"
 
 Hi. This page contains my career info.  
 If you don’t know anything about software development, This page isn’t for you.
-<br/><br/><br/><br/>
+<br/><br/>
 
 {{< highlight xml "linenos=false" >}}
 <note to="reader">
@@ -18,8 +18,8 @@ If you don’t know anything about software development, This page isn’t for y
   Number  5: I know the basics but not the details.
   Number  7: I know it well, and I know where to find more details.
   Number 10: I know all the details, and I keep myself updated.
+  <!-- Never underestimate a man who overestimates himself -->
 </note>
-<!-- Never underestimate a man who overestimates himself -->
 {{< / highlight >}}
 <br/><br/>
 
@@ -231,14 +231,14 @@ if __name__ == "__main__":
     # I know about PEP8 but in my own scripts I'm free to use my own standard
     script_dict = {
         "password-manager": "https://github.com/pouriya/ppg",
-        "file-encryptor": "https://github.com/pouriya/pcrypt",
+        "file-encryption": "https://github.com/pouriya/pcrypt",
         "git-structured-commit": "https://github.com/pouriya/pcommit",
         "gotify-file-downloader": "https://github.com/pouriya/pfdnld",
         "terminal-calendar": "https://github.com/pouriya/tir"
     }
     for script_name, link in script_dict.items():
         print(f"I implemented my own {script_name} in Python.")
-        print(f"\tIt's open-source, and you can see it here: {link}")
+        print(f"\tIt's open-source: {link}")
     
 class CV(object):
 
@@ -250,5 +250,10 @@ class CV(object):
         self.performance_tuning = 0
 
 {{< / highlight >}}
+<br/><br/>
 
-### This page is in 'Work-In-Progress' state...
+{{< highlight xml "linenos=false" >}}
+<note to="reader">
+  <page-status>Work-In-Progress</page-status>
+</note>
+{{< / highlight >}}
